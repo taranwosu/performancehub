@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Colors */
+    --color-primary: #2563EB; /* Deep blue (primary) - blue-600 */
+    --color-secondary: #64748B; /* Sophisticated slate gray (secondary) - slate-500 */
+    --color-accent: #0EA5E9; /* Lighter blue (accent) - sky-500 */
+    
+    /* Background Colors */
+    --color-background: #FAFAFA; /* Warm off-white (background) - gray-50 */
+    --color-surface: #FFFFFF; /* Pure white (surface) - white */
+    
+    /* Text Colors */
+    --color-text-primary: #1E293B; /* Rich charcoal (text primary) - slate-800 */
+    --color-text-secondary: #64748B; /* Medium gray (text secondary) - slate-500 */
+    
+    /* Status Colors */
+    --color-success: #059669; /* Professional green (success) - emerald-600 */
+    --color-warning: #D97706; /* Balanced orange (warning) - amber-600 */
+    --color-error: #DC2626; /* Clear red (error) - red-600 */
+    
+    /* Border Colors */
+    --color-border: #E2E8F0; /* Light gray border - slate-200 */
+    
+    /* Shadow Colors */
+    --shadow-light: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-medium: 0 4px 6px rgba(0,0,0,0.1);
+    
+    /* Animation Timing */
+    --timing-fast: 200ms;
+    --timing-medium: 300ms;
+    --timing-slow: 400ms;
+    --timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-text-primary font-body;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+  
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Navigation Components */
+  .nav-item {
+    @apply px-4 py-3 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors duration-200;
+  }
+  
+  .nav-item-active {
+    @apply text-primary font-semibold;
+  }
+  
+  /* Button Components */
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white px-4 py-2 rounded-md font-medium hover:bg-secondary/90 transition-colors duration-200;
+  }
+  
+  /* Card Components */
+  .card {
+    @apply bg-surface rounded-lg shadow-light border border-border;
+  }
+  
+  .card-elevated {
+    @apply shadow-medium;
+  }
+  
+  /* Form Components */
+  .form-input {
+    @apply w-full px-3 py-2 border border-border rounded-md bg-surface text-text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+  
+  /* Notification Components */
+  .notification-success {
+    @apply bg-success/10 border border-success/20 text-success;
+  }
+  
+  .notification-warning {
+    @apply bg-warning/10 border border-warning/20 text-warning;
+  }
+  
+  .notification-error {
+    @apply bg-error/10 border border-error/20 text-error;
+  }
+}
+
+@layer utilities {
+  /* Animation Utilities */
+  .animate-slide-in {
+    animation: slideIn var(--timing-medium) var(--timing-function);
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn var(--timing-medium) var(--timing-function);
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn var(--timing-fast) var(--timing-function);
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  /* Micro-interaction Utilities */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .hover-glow {
+    @apply transition-shadow duration-200 hover:shadow-medium;
+  }
+  
+  /* Text Utilities */
+  .text-data {
+    @apply font-mono;
+  }
+}
