@@ -1,19 +1,29 @@
 // src/Routes.jsx
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
 import { useAuth } from "./context/SupabaseProvider";
 
-// Page imports
-import Login from "pages/login";
-import Dashboard from "pages/dashboard";
-import GoalsManagement from "pages/goals-management";
-import PerformanceReviews from "pages/performance-reviews";
-import TeamAnalytics from "pages/team-analytics";
-import PIPs from "pages/pips";
-import OKRs from "pages/okrs";
-import Profile from "pages/profile";
+// Lazy load page components for better performance
+const Login = lazy(() => import("pages/login"));
+const Dashboard = lazy(() => import("pages/dashboard"));
+const GoalsManagement = lazy(() => import("pages/goals-management"));
+const PerformanceReviews = lazy(() => import("pages/performance-reviews"));
+const TeamAnalytics = lazy(() => import("pages/team-analytics"));
+const PIPs = lazy(() => import("pages/pips"));
+const OKRs = lazy(() => import("pages/okrs"));
+const Profile = lazy(() => import("pages/profile"));
+
+// Loading component for Suspense fallback
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <p className="text-text-secondary text-sm">Loading...</p>
+    </div>
+  </div>
+);
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
