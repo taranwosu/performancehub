@@ -25,6 +25,12 @@ const SettingsAdministration = () => {
       description: 'Manage employees, roles, and permissions'
     },
     {
+      id: 'organization',
+      label: 'Organization',
+      icon: 'Building',
+      description: 'Configure organization settings and information'
+    },
+    {
       id: 'performance-cycles',
       label: 'Performance Cycles',
       icon: 'RotateCcw',
