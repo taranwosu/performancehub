@@ -57,6 +57,13 @@ const DataExportManagement = () => {
       description: 'Export performance analytics and KPIs',
       icon: 'BarChart3',
       color: 'bg-red-500'
+    },
+    {
+      id: 'professional-reports',
+      title: 'Professional Reports',
+      description: 'Generate comprehensive HTML reports with charts and analytics',
+      icon: 'FileText',
+      color: 'bg-indigo-500'
     }
   ];
 
