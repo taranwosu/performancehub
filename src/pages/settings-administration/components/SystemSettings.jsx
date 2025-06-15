@@ -1,33 +1,195 @@
 // src/pages/settings-administration/components/SystemSettings.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
+import { useSupabase } from '../../../context/SupabaseProvider';
 
 const SystemSettings = () => {
-  const [activeSection, setActiveSection] = useState('notifications');
+  const { supabase } = useSupabase();
+  const [activeSection, setActiveSection] = useState('organization');
+  const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
+    // Organization Settings
+    organizationName: 'PerformanceHub',
+    organizationLogo: '',
+    timezone: 'UTC',
+    dateFormat: 'MM/DD/YYYY',
+    language: 'en',
+    
+    // Notification Settings
     emailNotifications: true,
     slackNotifications: false,
     pushNotifications: true,
     weeklyDigest: true,
-    dataRetention: '7-years',
-    backupFrequency: 'daily',
-    twoFactorAuth: true,
-    sessionTimeout: '30-minutes',
+    reviewReminders: true,
+    goalDeadlineAlerts: true,
+    
+    // Performance Management
+    reviewCycleFrequency: 'quarterly',
+    goalTrackingMethod: 'percentage',
+    feedbackAnonymous: true,
+    managerApprovalRequired: true,
+    
+    // Security Settings
+    sessionTimeout: '30',
     passwordPolicy: 'strong',
-    loginAttempts: '5'
+    twoFactorAuth: false,
+    maxLoginAttempts: '5',
+    
+    // Data & Backup
+    dataRetention: '7',
+    backupFrequency: 'daily',
+    exportFormat: 'excel',
+    
+    // Compliance
+    gdprCompliance: true,
+    auditTrail: true,
+    dataEncryption: true
   });
 
   const sections = [
+    { id: 'organization', label: 'Organization', icon: 'Building' },
     { id: 'notifications', label: 'Notifications', icon: 'Bell' },
-    { id: 'data', label: 'Data & Backup', icon: 'Database' },
+    { id: 'performance', label: 'Performance', icon: 'Target' },
     { id: 'security', label: 'Security', icon: 'Shield' },
-    { id: 'system', label: 'System', icon: 'Settings' },
+    { id: 'data', label: 'Data & Backup', icon: 'Database' },
     { id: 'compliance', label: 'Compliance', icon: 'FileCheck' }
   ];
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      // Load settings from Supabase
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading settings:', error);
+        return;
+      }
+
+      if (data) {
+        setSettings(prev => ({ ...prev, ...JSON.parse(data.settings || '{}') }));
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
+
+  const saveSettings = async () => {
+    setLoading(true);
+    try {
+      // Check if settings exist
+      const { data: existing } = await supabase
+        .from('system_settings')
+        .select('id')
+        .limit(1)
+        .single();
+
+      if (existing) {
+        // Update existing settings
+        const { error } = await supabase
+          .from('system_settings')
+          .update({
+            settings: JSON.stringify(settings),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new settings
+        const { error } = await supabase
+          .from('system_settings')
+          .insert({
+            settings: JSON.stringify(settings)
+          });
+
+        if (error) throw error;
+      }
+
+      alert('Settings saved successfully!');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('Failed to save settings');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
+
+  const renderOrganizationSection = () => (
+    <div className="space-y-6">
+      <div className="bg-background border border-border rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-text-primary mb-4">Organization Information</h4>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">Organization Name</label>
+            <input
+              type="text"
+              value={settings.organizationName}
+              onChange={(e) => handleSettingChange('organizationName', e.target.value)}
+              className="form-input"
+              placeholder="Enter organization name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">Logo URL</label>
+            <input
+              type="url"
+              value={settings.organizationLogo}
+              onChange={(e) => handleSettingChange('organizationLogo', e.target.value)}
+              className="form-input"
+              placeholder="https://example.com/logo.png"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">Timezone</label>
+              <select
+                value={settings.timezone}
+                onChange={(e) => handleSettingChange('timezone', e.target.value)}
+                className="form-input"
+              >
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">Eastern Time</option>
+                <option value="America/Chicago">Central Time</option>
+                <option value="America/Denver">Mountain Time</option>
+                <option value="America/Los_Angeles">Pacific Time</option>
+                <option value="Europe/London">London</option>
+                <option value="Europe/Paris">Paris</option>
+                <option value="Asia/Tokyo">Tokyo</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">Date Format</label>
+              <select
+                value={settings.dateFormat}
+                onChange={(e) => handleSettingChange('dateFormat', e.target.value)}
+                className="form-input"
+              >
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderNotificationsSection = () => (
     <div className="space-y-6">
@@ -43,8 +205,8 @@ const SystemSettings = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
-                checked={settings?.emailNotifications}
-                onChange={(e) => handleSettingChange('emailNotifications', e?.target?.checked)}
+                checked={settings.emailNotifications}
+                onChange={(e) => handleSettingChange('emailNotifications', e.target.checked)}
                 className="sr-only peer" 
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
@@ -57,7 +219,12 @@ const SystemSettings = () => {
               <p className="text-sm text-text-secondary">Send reminders for upcoming performance reviews</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
+              <input 
+                type="checkbox" 
+                checked={settings.reviewReminders}
+                onChange={(e) => handleSettingChange('reviewReminders', e.target.checked)}
+                className="sr-only peer" 
+              />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
@@ -70,8 +237,24 @@ const SystemSettings = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
-                checked={settings?.weeklyDigest}
-                onChange={(e) => handleSettingChange('weeklyDigest', e?.target?.checked)}
+                checked={settings.weeklyDigest}
+                onChange={(e) => handleSettingChange('weeklyDigest', e.target.checked)}
+                className="sr-only peer" 
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="font-medium text-text-primary">Goal Deadline Alerts</label>
+              <p className="text-sm text-text-secondary">Notify when goal deadlines are approaching</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={settings.goalDeadlineAlerts}
+                onChange={(e) => handleSettingChange('goalDeadlineAlerts', e.target.checked)}
                 className="sr-only peer" 
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
@@ -92,24 +275,140 @@ const SystemSettings = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
-                checked={settings?.pushNotifications}
-                onChange={(e) => handleSettingChange('pushNotifications', e?.target?.checked)}
+                checked={settings.pushNotifications}
+                onChange={(e) => handleSettingChange('pushNotifications', e.target.checked)}
                 className="sr-only peer" 
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
-          
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPerformanceSection = () => (
+    <div className="space-y-6">
+      <div className="bg-background border border-border rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-text-primary mb-4">Review Cycles</h4>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">Review Frequency</label>
+            <select
+              value={settings.reviewCycleFrequency}
+              onChange={(e) => handleSettingChange('reviewCycleFrequency', e.target.value)}
+              className="form-input"
+            >
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="bi-annual">Bi-Annual</option>
+              <option value="annual">Annual</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">Goal Tracking Method</label>
+            <select
+              value={settings.goalTrackingMethod}
+              onChange={(e) => handleSettingChange('goalTrackingMethod', e.target.value)}
+              className="form-input"
+            >
+              <option value="percentage">Percentage (0-100%)</option>
+              <option value="okr">OKR Style (0.0-1.0)</option>
+              <option value="milestone">Milestone Based</option>
+            </select>
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-text-primary">Slack Integration</label>
-              <p className="text-sm text-text-secondary">Send notifications to Slack channels</p>
+              <label className="font-medium text-text-primary">Anonymous Feedback</label>
+              <p className="text-sm text-text-secondary">Allow anonymous feedback submission</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
-                checked={settings?.slackNotifications}
-                onChange={(e) => handleSettingChange('slackNotifications', e?.target?.checked)}
+                checked={settings.feedbackAnonymous}
+                onChange={(e) => handleSettingChange('feedbackAnonymous', e.target.checked)}
+                className="sr-only peer" 
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="font-medium text-text-primary">Manager Approval Required</label>
+              <p className="text-sm text-text-secondary">Require manager approval for goal completion</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={settings.managerApprovalRequired}
+                onChange={(e) => handleSettingChange('managerApprovalRequired', e.target.checked)}
+                className="sr-only peer" 
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSecuritySection = () => (
+    <div className="space-y-6">
+      <div className="bg-background border border-border rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-text-primary mb-4">Authentication & Access</h4>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">Session Timeout (minutes)</label>
+            <input
+              type="number"
+              value={settings.sessionTimeout}
+              onChange={(e) => handleSettingChange('sessionTimeout', e.target.value)}
+              className="form-input"
+              min="5"
+              max="480"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">Password Policy</label>
+            <select
+              value={settings.passwordPolicy}
+              onChange={(e) => handleSettingChange('passwordPolicy', e.target.value)}
+              className="form-input"
+            >
+              <option value="basic">Basic (8+ characters)</option>
+              <option value="medium">Medium (8+ chars, mixed case)</option>
+              <option value="strong">Strong (8+ chars, mixed case, numbers, symbols)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">Max Login Attempts</label>
+            <input
+              type="number"
+              value={settings.maxLoginAttempts}
+              onChange={(e) => handleSettingChange('maxLoginAttempts', e.target.value)}
+              className="form-input"
+              min="3"
+              max="10"
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="font-medium text-text-primary">Two-Factor Authentication</label>
+              <p className="text-sm text-text-secondary">Require 2FA for all users</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={settings.twoFactorAuth}
+                onChange={(e) => handleSettingChange('twoFactorAuth', e.target.checked)}
                 className="sr-only peer" 
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
@@ -123,190 +422,51 @@ const SystemSettings = () => {
   const renderDataSection = () => (
     <div className="space-y-6">
       <div className="bg-background border border-border rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-text-primary mb-4">Data Retention</h4>
+        <h4 className="text-lg font-semibold text-text-primary mb-4">Data Management</h4>
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">Retention Period</label>
-            <select 
-              value={settings?.dataRetention}
-              onChange={(e) => handleSettingChange('dataRetention', e?.target?.value)}
-              className="input-field w-full md:w-auto"
+            <label className="block text-sm font-medium text-text-primary mb-2">Data Retention (years)</label>
+            <select
+              value={settings.dataRetention}
+              onChange={(e) => handleSettingChange('dataRetention', e.target.value)}
+              className="form-input"
             >
-              <option value="1-year">1 Year</option>
-              <option value="3-years">3 Years</option>
-              <option value="5-years">5 Years</option>
-              <option value="7-years">7 Years</option>
+              <option value="1">1 Year</option>
+              <option value="3">3 Years</option>
+              <option value="5">5 Years</option>
+              <option value="7">7 Years</option>
+              <option value="10">10 Years</option>
               <option value="indefinite">Indefinite</option>
             </select>
-            <p className="text-sm text-text-secondary mt-1">How long to keep user data and performance records</p>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-text-primary mb-2">Backup Frequency</label>
-            <select 
-              value={settings?.backupFrequency}
-              onChange={(e) => handleSettingChange('backupFrequency', e?.target?.value)}
-              className="input-field w-full md:w-auto"
+            <select
+              value={settings.backupFrequency}
+              onChange={(e) => handleSettingChange('backupFrequency', e.target.value)}
+              className="form-input"
             >
               <option value="hourly">Hourly</option>
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
             </select>
-            <p className="text-sm text-text-secondary mt-1">Frequency of automated data backups</p>
           </div>
-        </div>
-      </div>
-      
-      <div className="bg-background border border-border rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-text-primary mb-4">Data Export</h4>
-        
-        <div className="space-y-4">
-          <p className="text-sm text-text-secondary">Export system data for backup or migration purposes</p>
-          
-          <div className="flex flex-wrap gap-3">
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="Download" size={16} />
-              <span>Export Users</span>
-            </button>
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="Download" size={16} />
-              <span>Export Goals</span>
-            </button>
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="Download" size={16} />
-              <span>Export Reviews</span>
-            </button>
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="Download" size={16} />
-              <span>Full Export</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
-  const renderSecuritySection = () => (
-    <div className="space-y-6">
-      <div className="bg-background border border-border rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-text-primary mb-4">Authentication</h4>
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="font-medium text-text-primary">Two-Factor Authentication</label>
-              <p className="text-sm text-text-secondary">Require 2FA for all users</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={settings?.twoFactorAuth}
-                onChange={(e) => handleSettingChange('twoFactorAuth', e?.target?.checked)}
-                className="sr-only peer" 
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
-          
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">Session Timeout</label>
-            <select 
-              value={settings?.sessionTimeout}
-              onChange={(e) => handleSettingChange('sessionTimeout', e?.target?.value)}
-              className="input-field w-full md:w-auto"
+            <label className="block text-sm font-medium text-text-primary mb-2">Export Format</label>
+            <select
+              value={settings.exportFormat}
+              onChange={(e) => handleSettingChange('exportFormat', e.target.value)}
+              className="form-input"
             >
-              <option value="15-minutes">15 Minutes</option>
-              <option value="30-minutes">30 Minutes</option>
-              <option value="1-hour">1 Hour</option>
-              <option value="4-hours">4 Hours</option>
-              <option value="8-hours">8 Hours</option>
+              <option value="excel">Excel (.xlsx)</option>
+              <option value="csv">CSV (.csv)</option>
+              <option value="pdf">PDF (.pdf)</option>
+              <option value="json">JSON (.json)</option>
             </select>
-            <p className="text-sm text-text-secondary mt-1">Automatic logout after inactivity</p>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">Password Policy</label>
-            <select 
-              value={settings?.passwordPolicy}
-              onChange={(e) => handleSettingChange('passwordPolicy', e?.target?.value)}
-              className="input-field w-full md:w-auto"
-            >
-              <option value="basic">Basic (8+ characters)</option>
-              <option value="strong">Strong (12+ chars, mixed case, numbers)</option>
-              <option value="complex">Complex (16+ chars, symbols required)</option>
-            </select>
-            <p className="text-sm text-text-secondary mt-1">Password requirements for user accounts</p>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">Failed Login Attempts</label>
-            <select 
-              value={settings?.loginAttempts}
-              onChange={(e) => handleSettingChange('loginAttempts', e?.target?.value)}
-              className="input-field w-full md:w-auto"
-            >
-              <option value="3">3 Attempts</option>
-              <option value="5">5 Attempts</option>
-              <option value="10">10 Attempts</option>
-              <option value="unlimited">Unlimited</option>
-            </select>
-            <p className="text-sm text-text-secondary mt-1">Account lockout after failed attempts</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderSystemSection = () => (
-    <div className="space-y-6">
-      <div className="bg-background border border-border rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-text-primary mb-4">System Information</h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="text-sm font-medium text-text-secondary">Version</label>
-            <p className="text-lg font-semibold text-text-primary">2.1.4</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-text-secondary">Environment</label>
-            <p className="text-lg font-semibold text-text-primary">Production</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-text-secondary">Uptime</label>
-            <p className="text-lg font-semibold text-text-primary">15 days, 4 hours</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-text-secondary">Last Update</label>
-            <p className="text-lg font-semibold text-text-primary">Jan 15, 2024</p>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-background border border-border rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-text-primary mb-4">Maintenance</h4>
-        
-        <div className="space-y-4">
-          <p className="text-sm text-text-secondary">System maintenance and administrative actions</p>
-          
-          <div className="flex flex-wrap gap-3">
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="RefreshCw" size={16} />
-              <span>Clear Cache</span>
-            </button>
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="Database" size={16} />
-              <span>Optimize Database</span>
-            </button>
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="FileText" size={16} />
-              <span>View Logs</span>
-            </button>
-            <button className="btn-outline flex items-center space-x-2">
-              <Icon name="Download" size={16} />
-              <span>System Report</span>
-            </button>
           </div>
         </div>
       </div>
@@ -316,66 +476,53 @@ const SystemSettings = () => {
   const renderComplianceSection = () => (
     <div className="space-y-6">
       <div className="bg-background border border-border rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-text-primary mb-4">GDPR Compliance</h4>
+        <h4 className="text-lg font-semibold text-text-primary mb-4">Compliance & Privacy</h4>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-text-primary">Data Processing Consent</label>
-              <p className="text-sm text-text-secondary">Require explicit consent for data processing</p>
+              <label className="font-medium text-text-primary">GDPR Compliance</label>
+              <p className="text-sm text-text-secondary">Enable GDPR compliance features</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
+              <input 
+                type="checkbox" 
+                checked={settings.gdprCompliance}
+                onChange={(e) => handleSettingChange('gdprCompliance', e.target.checked)}
+                className="sr-only peer" 
+              />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-text-primary">Right to be Forgotten</label>
-              <p className="text-sm text-text-secondary">Allow users to request data deletion</p>
+              <label className="font-medium text-text-primary">Audit Trail</label>
+              <p className="text-sm text-text-secondary">Log all user actions for auditing</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
+              <input 
+                type="checkbox" 
+                checked={settings.auditTrail}
+                onChange={(e) => handleSettingChange('auditTrail', e.target.checked)}
+                className="sr-only peer" 
+              />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-text-primary">Data Portability</label>
-              <p className="text-sm text-text-secondary">Enable data export for users</p>
+              <label className="font-medium text-text-primary">Data Encryption</label>
+              <p className="text-sm text-text-secondary">Encrypt sensitive data at rest</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-background border border-border rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-text-primary mb-4">Audit & Logging</h4>
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="font-medium text-text-primary">User Activity Logging</label>
-              <p className="text-sm text-text-secondary">Log all user actions for audit trail</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="font-medium text-text-primary">Admin Actions</label>
-              <p className="text-sm text-text-secondary">Track administrative changes</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
+              <input 
+                type="checkbox" 
+                checked={settings.dataEncryption}
+                onChange={(e) => handleSettingChange('dataEncryption', e.target.checked)}
+                className="sr-only peer" 
+              />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
@@ -384,50 +531,68 @@ const SystemSettings = () => {
     </div>
   );
 
-  const renderSectionContent = () => {
+  const renderContent = () => {
     switch (activeSection) {
+      case 'organization':
+        return renderOrganizationSection();
       case 'notifications':
         return renderNotificationsSection();
-      case 'data':
-        return renderDataSection();
+      case 'performance':
+        return renderPerformanceSection();
       case 'security':
         return renderSecuritySection();
-      case 'system':
-        return renderSystemSection();
+      case 'data':
+        return renderDataSection();
       case 'compliance':
         return renderComplianceSection();
       default:
-        return renderNotificationsSection();
+        return renderOrganizationSection();
     }
   };
 
   return (
     <div className="p-6">
       {/* Section Navigation */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {sections?.map(section => (
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-border">
+        {sections.map((section) => (
           <button
-            key={section?.id}
-            onClick={() => setActiveSection(section?.id)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-              activeSection === section?.id
-                ? 'bg-primary text-white' :'bg-background text-text-secondary hover:text-text-primary hover:bg-surface'
+            key={section.id}
+            onClick={() => setActiveSection(section.id)}
+            className={`flex items-center space-x-2 px-4 py-2 border-b-2 transition-colors duration-200 ${
+              activeSection === section.id
+                ? 'border-primary text-primary bg-primary/5' 
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
-            <Icon name={section?.icon} size={16} />
-            <span>{section?.label}</span>
+            <Icon name={section.icon} size={16} />
+            <span className="font-medium">{section.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Section Content */}
-      {renderSectionContent()}
+      {/* Content */}
+      <div className="space-y-6">
+        {renderContent()}
 
-      {/* Save Button */}
-      <div className="flex justify-end mt-8 pt-6 border-t border-border">
-        <div className="flex items-center space-x-3">
-          <button className="btn-outline">Reset to Defaults</button>
-          <button className="btn-primary">Save Changes</button>
+        {/* Save Button */}
+        <div className="flex justify-end pt-6 border-t border-border">
+          <button 
+            onClick={saveSettings}
+            disabled={loading}
+            className="btn-primary flex items-center space-x-2"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Icon name="Save" size={16} />
+                <span>Save Settings</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
