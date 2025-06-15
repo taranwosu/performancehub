@@ -32,6 +32,12 @@ const SettingsAdministration = () => {
       description: 'Configure organization settings and information'
     },
     {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: 'Bell',
+      description: 'Manage email templates and notification settings'
+    },
+    {
       id: 'performance-cycles',
       label: 'Performance Cycles',
       icon: 'RotateCcw',
