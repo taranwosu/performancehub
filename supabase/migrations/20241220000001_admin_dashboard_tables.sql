@@ -162,6 +162,14 @@ CREATE INDEX IF NOT EXISTS idx_export_history_created_at ON public.export_histor
 CREATE INDEX IF NOT EXISTS idx_export_history_type ON public.export_history(export_type);
 CREATE INDEX IF NOT EXISTS idx_scheduled_reports_is_active ON public.scheduled_reports(is_active);
 CREATE INDEX IF NOT EXISTS idx_scheduled_reports_next_run ON public.scheduled_reports(next_run_at);
+CREATE INDEX IF NOT EXISTS idx_security_logs_user_id ON public.security_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_security_logs_timestamp ON public.security_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_security_logs_event_type ON public.security_logs(event_type);
+CREATE INDEX IF NOT EXISTS idx_failed_login_attempts_email ON public.failed_login_attempts(email);
+CREATE INDEX IF NOT EXISTS idx_failed_login_attempts_ip ON public.failed_login_attempts(ip_address);
+CREATE INDEX IF NOT EXISTS idx_failed_login_attempts_time ON public.failed_login_attempts(attempt_time);
+CREATE INDEX IF NOT EXISTS idx_rate_limits_identifier ON public.rate_limits(identifier, action);
+CREATE INDEX IF NOT EXISTS idx_rate_limits_expires ON public.rate_limits(expires_at);
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
