@@ -60,58 +60,60 @@ const Routes = () => {
     <BrowserRouter>
       <ErrorBoundary>
         <ScrollToTop />
-        <RouterRoutes>
-          <Route path="/login" element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/goals-management" element={
-            <ProtectedRoute>
-              <GoalsManagement />
-            </ProtectedRoute>
-          } />
-          <Route path="/performance-reviews" element={
-            <ProtectedRoute>
-              <PerformanceReviews />
-            </ProtectedRoute>
-          } />
-          <Route path="/team-analytics" element={
-            <ProtectedRoute>
-              <TeamAnalytics />
-            </ProtectedRoute>
-          } />
-          <Route path="/pips" element={
-            <ProtectedRoute>
-              <PIPs />
-            </ProtectedRoute>
-          } />
-          <Route path="/okrs" element={
-            <ProtectedRoute>
-              <OKRs />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } />
-        </RouterRoutes>
+        <Suspense fallback={<PageLoader />}>
+          <RouterRoutes>
+            <Route path="/login" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/goals-management" element={
+              <ProtectedRoute>
+                <GoalsManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/performance-reviews" element={
+              <ProtectedRoute>
+                <PerformanceReviews />
+              </ProtectedRoute>
+            } />
+            <Route path="/team-analytics" element={
+              <ProtectedRoute>
+                <TeamAnalytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/pips" element={
+              <ProtectedRoute>
+                <PIPs />
+              </ProtectedRoute>
+            } />
+            <Route path="/okrs" element={
+              <ProtectedRoute>
+                <OKRs />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } />
+          </RouterRoutes>
+        </Suspense>
       </ErrorBoundary>
     </BrowserRouter>
   );
