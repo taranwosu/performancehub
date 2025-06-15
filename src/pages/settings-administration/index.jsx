@@ -84,6 +84,8 @@ const SettingsAdministration = () => {
         return <OrganizationManagement />;
       case 'notifications':
         return <NotificationManagement />;
+      case 'data-export':
+        return <DataExportManagement />;
       case 'performance-cycles':
         return <PerformanceCycles />;
       case 'goal-templates':
