@@ -212,6 +212,20 @@ CREATE INDEX IF NOT EXISTS idx_failed_login_attempts_ip ON public.failed_login_a
 CREATE INDEX IF NOT EXISTS idx_failed_login_attempts_time ON public.failed_login_attempts(attempt_time);
 CREATE INDEX IF NOT EXISTS idx_rate_limits_identifier ON public.rate_limits(identifier, action);
 CREATE INDEX IF NOT EXISTS idx_rate_limits_expires ON public.rate_limits(expires_at);
+CREATE INDEX IF NOT EXISTS idx_performance_metrics_type ON public.performance_metrics(metric_type);
+CREATE INDEX IF NOT EXISTS idx_performance_metrics_session ON public.performance_metrics(session_id);
+CREATE INDEX IF NOT EXISTS idx_performance_metrics_timestamp ON public.performance_metrics(timestamp);
+CREATE INDEX IF NOT EXISTS idx_performance_metrics_user ON public.performance_metrics(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_session_id ON public.analytics_sessions(session_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_user_id ON public.analytics_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_updated_at ON public.analytics_sessions(updated_at);
+CREATE INDEX IF NOT EXISTS idx_error_logs_error_type ON public.error_logs(error_type);
+CREATE INDEX IF NOT EXISTS idx_error_logs_session_id ON public.error_logs(session_id);
+CREATE INDEX IF NOT EXISTS idx_error_logs_timestamp ON public.error_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_error_logs_resolved ON public.error_logs(resolved);
+CREATE INDEX IF NOT EXISTS idx_health_checks_service ON public.health_checks(service_name);
+CREATE INDEX IF NOT EXISTS idx_health_checks_timestamp ON public.health_checks(timestamp);
+CREATE INDEX IF NOT EXISTS idx_health_checks_status ON public.health_checks(status);
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
