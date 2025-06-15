@@ -76,6 +76,40 @@ CREATE TABLE IF NOT EXISTS public.email_queue (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create export_history table for data export tracking
+CREATE TABLE IF NOT EXISTS public.export_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    export_type TEXT NOT NULL, -- users, goals, reviews, feedback, analytics
+    format TEXT NOT NULL, -- csv, json, excel, pdf
+    record_count INTEGER DEFAULT 0,
+    file_size_bytes BIGINT DEFAULT 0,
+    filters JSONB DEFAULT '{}',
+    status TEXT DEFAULT 'completed', -- pending, completed, failed
+    error_message TEXT,
+    file_url TEXT, -- Optional: store file location if keeping exports
+    exported_by UUID REFERENCES auth.users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Create scheduled_reports table for automated reporting
+CREATE TABLE IF NOT EXISTS public.scheduled_reports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    description TEXT,
+    report_type TEXT NOT NULL, -- users, goals, reviews, analytics, custom
+    format TEXT NOT NULL DEFAULT 'csv', -- csv, json, excel, pdf
+    schedule_pattern TEXT NOT NULL, -- cron-like pattern: '0 9 * * 1' for Monday 9 AM
+    filters JSONB DEFAULT '{}',
+    recipients TEXT[] DEFAULT '{}', -- Email addresses to send reports to
+    is_active BOOLEAN DEFAULT true,
+    last_run_at TIMESTAMP WITH TIME ZONE,
+    next_run_at TIMESTAMP WITH TIME ZONE,
+    created_by UUID REFERENCES auth.users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Add organization_id to user_profiles for multi-tenant support
 ALTER TABLE public.user_profiles 
 ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations(id);
