@@ -80,6 +80,10 @@ CREATE TABLE IF NOT EXISTS public.email_queue (
 ALTER TABLE public.user_profiles 
 ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations(id);
 
+-- Add notification preferences column
+ALTER TABLE public.user_profiles 
+ADD COLUMN IF NOT EXISTS notification_preferences JSONB DEFAULT '{}' NOT NULL;
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON public.audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON public.audit_logs(created_at);
