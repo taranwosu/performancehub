@@ -201,6 +201,9 @@ ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.email_queue ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.export_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.scheduled_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.security_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.failed_login_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rate_limits ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies
 
