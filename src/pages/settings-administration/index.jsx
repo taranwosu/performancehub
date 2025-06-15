@@ -7,6 +7,7 @@ import Icon from '../../components/AppIcon';
 // Import components
 import UserManagement from './components/UserManagement';
 import OrganizationManagement from './components/OrganizationManagement';
+import NotificationManagement from './components/NotificationManagement';
 import PerformanceCycles from './components/PerformanceCycles';
 import GoalTemplates from './components/GoalTemplates';
 import ReviewTemplates from './components/ReviewTemplates';
