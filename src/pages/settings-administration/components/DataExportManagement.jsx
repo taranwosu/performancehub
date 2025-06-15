@@ -320,6 +320,20 @@ const DataExportManagement = () => {
 
       {/* Content */}
       {renderContent()}
+
+      {/* Report Preview Modal */}
+      {showReportPreview && (
+        <ReportPreviewModal
+          isOpen={showReportPreview}
+          onClose={() => {
+            setShowReportPreview(false);
+            setSelectedReportType(null);
+            setReportFilters({});
+          }}
+          reportType={selectedReportType}
+          filters={reportFilters}
+        />
+      )}
     </div>
   );
 };
