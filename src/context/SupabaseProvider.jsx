@@ -163,7 +163,7 @@ export const SupabaseProvider = ({ children }) => {
         .select(`
           *,
           goal_metrics(*),
-          assignee:user_profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url),
+          assignee:user_profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, email),
           manager:user_profiles!goals_manager_id_fkey(id, first_name, last_name, avatar_url)
         `)
         .single();
@@ -172,6 +172,20 @@ export const SupabaseProvider = ({ children }) => {
       
       // Log activity
       await logActivity('goal_created', 'goal', data.id, { title: data.title });
+      
+      // Send notification email to assignee if different from creator
+      if (data.assignee && data.assignee.email && data.assignee.email !== user?.email) {
+        try {
+          await notificationService.notifyGoalCreated(
+            data,
+            data.assignee.email,
+            `${data.assignee.first_name} ${data.assignee.last_name}`
+          );
+        } catch (notificationError) {
+          console.error('Error sending goal creation notification:', notificationError);
+          // Don't fail the goal creation if notification fails
+        }
+      }
       
       return data;
     } catch (error) {
