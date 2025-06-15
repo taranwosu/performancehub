@@ -110,6 +110,38 @@ CREATE TABLE IF NOT EXISTS public.scheduled_reports (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create security_logs table for security event tracking
+CREATE TABLE IF NOT EXISTS public.security_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_type TEXT NOT NULL, -- login_attempt, login_failed, suspicious_activity, etc.
+    user_id UUID REFERENCES auth.users(id),
+    ip_address INET,
+    user_agent TEXT,
+    details JSONB DEFAULT '{}',
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    severity TEXT DEFAULT 'info' -- info, warning, error, critical
+);
+
+-- Create failed_login_attempts table for tracking login failures
+CREATE TABLE IF NOT EXISTS public.failed_login_attempts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT NOT NULL,
+    ip_address INET,
+    user_agent TEXT,
+    attempt_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    failure_reason TEXT -- invalid_password, account_locked, etc.
+);
+
+-- Create rate_limits table for tracking API rate limits
+CREATE TABLE IF NOT EXISTS public.rate_limits (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    identifier TEXT NOT NULL, -- user_id, ip_address, etc.
+    action TEXT NOT NULL, -- api_call, login_attempt, etc.
+    attempts INTEGER DEFAULT 1,
+    window_start TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 -- Add organization_id to user_profiles for multi-tenant support
 ALTER TABLE public.user_profiles 
 ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations(id);
