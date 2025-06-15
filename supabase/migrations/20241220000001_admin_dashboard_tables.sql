@@ -159,6 +159,8 @@ ALTER TABLE public.organizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notification_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.email_queue ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.export_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.scheduled_reports ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies
 
