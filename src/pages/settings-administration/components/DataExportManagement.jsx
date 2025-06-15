@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import { useSupabase } from '../../../context/SupabaseProvider';
 import { exportService } from '../../../services/exportService';
+import { reportGenerator } from '../../../services/reportGenerator';
+import ReportPreviewModal from './ReportPreviewModal';
 
 const DataExportManagement = () => {
   const { supabase } = useSupabase();
