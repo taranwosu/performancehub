@@ -66,6 +66,8 @@ const SettingsAdministration = () => {
     switch (activeSection) {
       case 'user-management':
         return <UserManagement />;
+      case 'organization':
+        return <OrganizationManagement />;
       case 'performance-cycles':
         return <PerformanceCycles />;
       case 'goal-templates':
