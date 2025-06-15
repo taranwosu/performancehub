@@ -302,6 +302,34 @@ CREATE POLICY "scheduled_reports_admin_access" ON public.scheduled_reports
         )
     );
 
+-- Security logs - admins only
+CREATE POLICY "security_logs_admin_read" ON public.security_logs
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.user_profiles 
+            WHERE user_profiles.id = auth.uid() 
+            AND user_profiles.role IN ('hr', 'executive')
+        )
+    );
+
+-- Security logs - system can insert
+CREATE POLICY "security_logs_system_insert" ON public.security_logs
+    FOR INSERT WITH CHECK (true);
+
+-- Failed login attempts - admins only
+CREATE POLICY "failed_login_attempts_admin_access" ON public.failed_login_attempts
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.user_profiles 
+            WHERE user_profiles.id = auth.uid() 
+            AND user_profiles.role IN ('hr', 'executive')
+        )
+    );
+
+-- Rate limits - system access only
+CREATE POLICY "rate_limits_system_access" ON public.rate_limits
+    FOR ALL USING (true);
+
 -- Insert default system settings
 INSERT INTO public.system_settings (settings, created_by) 
 VALUES (
