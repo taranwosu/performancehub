@@ -10,6 +10,27 @@ export default defineConfig({
   build: {
     outDir: "build",
     chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@tailwindcss/forms', 'framer-motion', 'lucide-react'],
+          charts: ['recharts', 'd3'],
+          supabase: ['@supabase/supabase-js'],
+          forms: ['react-hook-form'],
+          utils: ['date-fns', 'axios']
+        }
+      }
+    },
+    // Minification options
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
   },
   plugins: [tsconfigPaths(), react(), tagger()],
   server: {
