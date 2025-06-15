@@ -47,10 +47,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "build": {
-      "maxDuration": 300
-    }
-  }
+  ]
 }
