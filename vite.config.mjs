@@ -23,14 +23,8 @@ export default defineConfig({
         }
       }
     },
-    // Minification options
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    }
+    // Use esbuild for minification instead of terser for better compatibility
+    minify: 'esbuild'
   },
   plugins: [tsconfigPaths(), react(), tagger()],
   server: {
@@ -38,5 +32,9 @@ export default defineConfig({
     host: "0.0.0.0",
     strictPort: true,
     allowedHosts: ['.amazonaws.com', '.builtwithrocket.new']
+  },
+  // Define Node.js globals for browser compatibility
+  define: {
+    global: 'globalThis',
   }
 });
