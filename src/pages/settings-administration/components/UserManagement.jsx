@@ -461,10 +461,13 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, departments }) => {
     setLoading(true);
 
     try {
+      // Generate temporary password
+      const tempPassword = 'TempPassword123!';
+
       // Create user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: formData.email,
-        password: 'TempPassword123!', // Temporary password
+        password: tempPassword,
         email_confirm: true
       });
 
@@ -488,8 +491,21 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, departments }) => {
 
       if (profileError) throw profileError;
 
+      // Send welcome email notification
+      try {
+        const { notificationService } = await import('../../../services/notificationService');
+        await notificationService.sendWelcomeEmail(
+          formData.email,
+          `${formData.first_name} ${formData.last_name}`,
+          tempPassword
+        );
+      } catch (notificationError) {
+        console.error('Error sending welcome email:', notificationError);
+        // Don't fail user creation if email fails
+      }
+
       onUserAdded();
-      alert('User created successfully! They will receive an email to set their password.');
+      alert('User created successfully! They will receive a welcome email with login instructions.');
     } catch (error) {
       console.error('Error creating user:', error);
       alert('Failed to create user: ' + error.message);
