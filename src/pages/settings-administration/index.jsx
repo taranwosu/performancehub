@@ -75,6 +75,8 @@ const SettingsAdministration = () => {
         return <UserManagement />;
       case 'organization':
         return <OrganizationManagement />;
+      case 'notifications':
+        return <NotificationManagement />;
       case 'performance-cycles':
         return <PerformanceCycles />;
       case 'goal-templates':
