@@ -39,6 +39,12 @@ const SettingsAdministration = () => {
       description: 'Manage email templates and notification settings'
     },
     {
+      id: 'data-export',
+      label: 'Data Export',
+      icon: 'Download',
+      description: 'Export data, generate reports, and manage backups'
+    },
+    {
       id: 'performance-cycles',
       label: 'Performance Cycles',
       icon: 'RotateCcw',
