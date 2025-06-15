@@ -228,6 +228,37 @@ CREATE POLICY "email_queue_admin_access" ON public.email_queue
         )
     );
 
+-- Export history - users can see their own exports, admins can see all
+CREATE POLICY "export_history_access" ON public.export_history
+    FOR SELECT USING (
+        exported_by = auth.uid() OR
+        EXISTS (
+            SELECT 1 FROM public.user_profiles 
+            WHERE user_profiles.id = auth.uid() 
+            AND user_profiles.role IN ('hr', 'executive')
+        )
+    );
+
+-- Export history - only admins can create exports
+CREATE POLICY "export_history_admin_create" ON public.export_history
+    FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM public.user_profiles 
+            WHERE user_profiles.id = auth.uid() 
+            AND user_profiles.role IN ('hr', 'executive')
+        )
+    );
+
+-- Scheduled reports - admins only
+CREATE POLICY "scheduled_reports_admin_access" ON public.scheduled_reports
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.user_profiles 
+            WHERE user_profiles.id = auth.uid() 
+            AND user_profiles.role IN ('hr', 'executive')
+        )
+    );
+
 -- Insert default system settings
 INSERT INTO public.system_settings (settings, created_by) 
 VALUES (
