@@ -11,6 +11,9 @@ const DataExportManagement = () => {
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [exportProgress, setExportProgress] = useState(null);
+  const [showReportPreview, setShowReportPreview] = useState(false);
+  const [selectedReportType, setSelectedReportType] = useState(null);
+  const [reportFilters, setReportFilters] = useState({});
 
   const tabs = [
     { id: 'quick-export', label: 'Quick Export', icon: 'Download' },
