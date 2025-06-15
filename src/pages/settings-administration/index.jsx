@@ -46,6 +46,12 @@ const SettingsAdministration = () => {
       description: 'Export data, generate reports, and manage backups'
     },
     {
+      id: 'security',
+      label: 'Security',
+      icon: 'Shield',
+      description: 'Security monitoring, policies, and access control'
+    },
+    {
       id: 'performance-cycles',
       label: 'Performance Cycles',
       icon: 'RotateCcw',
