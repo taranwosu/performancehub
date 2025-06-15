@@ -125,6 +125,11 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON public.audit_logs(entity_typ
 CREATE INDEX IF NOT EXISTS idx_email_queue_status ON public.email_queue(status);
 CREATE INDEX IF NOT EXISTS idx_email_queue_scheduled_at ON public.email_queue(scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_organization_id ON public.user_profiles(organization_id);
+CREATE INDEX IF NOT EXISTS idx_export_history_exported_by ON public.export_history(exported_by);
+CREATE INDEX IF NOT EXISTS idx_export_history_created_at ON public.export_history(created_at);
+CREATE INDEX IF NOT EXISTS idx_export_history_type ON public.export_history(export_type);
+CREATE INDEX IF NOT EXISTS idx_scheduled_reports_is_active ON public.scheduled_reports(is_active);
+CREATE INDEX IF NOT EXISTS idx_scheduled_reports_next_run ON public.scheduled_reports(next_run_at);
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
