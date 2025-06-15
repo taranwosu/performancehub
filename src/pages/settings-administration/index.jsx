@@ -9,6 +9,7 @@ import UserManagement from './components/UserManagement';
 import OrganizationManagement from './components/OrganizationManagement';
 import NotificationManagement from './components/NotificationManagement';
 import DataExportManagement from './components/DataExportManagement';
+import SecurityManagement from './components/SecurityManagement';
 import PerformanceCycles from './components/PerformanceCycles';
 import GoalTemplates from './components/GoalTemplates';
 import ReviewTemplates from './components/ReviewTemplates';
