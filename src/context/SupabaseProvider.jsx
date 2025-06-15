@@ -1,6 +1,7 @@
 // src/context/SupabaseProvider.jsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { notificationService } from '../services/notificationService';
 
 const SupabaseContext = createContext({});
 
