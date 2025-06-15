@@ -142,6 +142,48 @@ CREATE TABLE IF NOT EXISTS public.rate_limits (
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+-- Create performance_metrics table for detailed performance tracking
+CREATE TABLE IF NOT EXISTS public.performance_metrics (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    metric_type TEXT NOT NULL, -- page_load, api_call, custom_timing, business_event
+    data JSONB NOT NULL DEFAULT '{}',
+    session_id TEXT,
+    user_id UUID REFERENCES auth.users(id),
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create analytics_sessions table for session-based analytics
+CREATE TABLE IF NOT EXISTS public.analytics_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id TEXT NOT NULL UNIQUE,
+    user_id UUID REFERENCES auth.users(id),
+    metrics JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create error_logs table for detailed error tracking
+CREATE TABLE IF NOT EXISTS public.error_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    error_type TEXT NOT NULL, -- javascript_error, promise_rejection, api_error
+    error_data JSONB NOT NULL DEFAULT '{}',
+    session_id TEXT,
+    user_id UUID REFERENCES auth.users(id),
+    severity TEXT DEFAULT 'error', -- info, warning, error, critical
+    resolved BOOLEAN DEFAULT false,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create health_checks table for system health monitoring
+CREATE TABLE IF NOT EXISTS public.health_checks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    service_name TEXT NOT NULL,
+    status TEXT NOT NULL, -- healthy, degraded, unhealthy
+    response_time_ms INTEGER,
+    details JSONB DEFAULT '{}',
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Add organization_id to user_profiles for multi-tenant support
 ALTER TABLE public.user_profiles 
 ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations(id);
